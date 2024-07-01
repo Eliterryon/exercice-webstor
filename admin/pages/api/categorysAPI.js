@@ -1,12 +1,15 @@
 import { mongooseConnect } from "@/lib/mongoos";
 import { Category } from "@/models/categoryModel";
 import mongoose from "mongoose";
-import {isAdminRequest } from "./auth/[...nextauth]";
+import { authOptions, isAdminRequest } from "./auth/[...nextauth]";
+import { getServerSession } from "next-auth";
 
 export default async function handler(req, res) {
     const {method} = req;
     mongoose.Promise = mongooseConnect();
-    isAdminRequest(res, req);
+
+    const session = await getServerSession(req, res, authOptions)
+    isAdminRequest(res, session)
 
     if (method === "POST") {
         const {name, parent} = req.body;

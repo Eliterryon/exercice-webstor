@@ -4,7 +4,7 @@ import NextAuth, { getServerSession } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 
 
-const adminEmails = ['mucklib@gmail.com'];
+const adminEmails = ['mucklib@gmail.com', 'muckli.bruno@gmail.com'];
 
 export const authOptions = {
   secret: process.env.SECRET,
@@ -28,8 +28,7 @@ export const authOptions = {
 
 export default NextAuth(authOptions);
 
-export async function isAdminRequest(req,res) {
-  const session = await getServerSession(req,res,authOptions);
+export async function isAdminRequest(res, session) {
   if (!adminEmails.includes(session?.user?.email)) {
     res.status(401);
     res.end();

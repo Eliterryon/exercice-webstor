@@ -8,7 +8,6 @@ export default function setting() {
 
     function getCategorys(){
         axios.get("/api/treeCategorysAPI").then(response => {
-            console.log(JSON.stringify(response.data, null, 2))
             setData(JSON.stringify(response.data, null, 2))
         });
     }

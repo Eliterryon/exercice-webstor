@@ -6,17 +6,22 @@ import { useEffect, useState } from "react";
 
 export default function product() {
     const [products, setProducts] = useState([]);
+    const [isFetured, setIsFetured] = useState([]);
+    const [open, setOpen] = useState(false);
 
     function getProducts(){
         axios.get("/api/productsAPI").then(response => {
             setProducts(response.data)
         })
     }
-
-    useEffect(getProducts, []);
-
-
-    const [open, setOpen] = useState(false);
+    
+    function getisFetured(){
+        axios.get("/api/featuredAPI").then(response => {
+            let result = response.data.map(({ _id }) => _id)
+            setIsFetured(result)
+        })
+    }
+    
     const closeModal = () => {
         dataModal.open=false
         setOpen(false);
@@ -31,12 +36,29 @@ export default function product() {
     };
     const [dataModal, setDataModal] = useState({ prompt:"", open:open, close:closeModal, action:deleteProduct, id:""});
 
-
     async function deleteProduct(){
         await axios.delete("/api/productsAPI?id="+ dataModal.id);
         getProducts()
         closeModal();
     }
+
+    async function onFeatured(e, _id){
+        const checked = e.target.checked;
+        if (checked){
+            const data = {"_id" : _id};
+            await axios.post("/api/featuredAPI", data);
+            e.target.checked = true;
+        }
+        if (!checked) {
+            await axios.delete("/api/featuredAPI?id="+ _id);
+            e.target.checked = false;
+        }
+
+    }
+    useEffect(() => {
+        getisFetured();
+        getProducts();
+    }, [])
 
     return (
         <Layout>
@@ -52,6 +74,8 @@ export default function product() {
                         <td>
                             Product name
                         </td>
+                        <td>Featured</td>
+                        <td></td>
                         <td></td>
                     </tr>
                 </thead>
@@ -60,6 +84,9 @@ export default function product() {
                     <tr key={product._id}>
                         <td className="w-full" >
                             {product.title} 
+                        </td>
+                        <td>
+                            <input type="checkbox" onChange={(e)=>(onFeatured(e, product._id))} checked={isFetured.includes(product._id)?(true):(false)} />
                         </td>
                         <td className='button' >
                             <Link href={'/product/edit/'+ product._id}>
@@ -78,7 +105,7 @@ export default function product() {
                     </tr>
                     ))}
                 </tbody>
-            </table>            
+            </table>    
             <PopupYesNo data = {dataModal}/>
         </Layout>
     )

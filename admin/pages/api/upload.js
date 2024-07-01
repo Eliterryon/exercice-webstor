@@ -2,11 +2,14 @@ import multiparty from 'multiparty';
 import {PutObjectCommand, S3Client} from '@aws-sdk/client-s3';
 import fs from 'fs';
 import mime from 'mime-types';
-import { isAdminRequest } from './auth/[...nextauth]';
+import { authOptions, isAdminRequest } from './auth/[...nextauth]';
+import { getServerSession } from 'next-auth';
 
 export default async function handler(req, res) {
     mongoose.Promise = mongooseConnect()
-    isAdminRequest(res, req);
+    
+    const session = await getServerSession(req, res, authOptions)
+    isAdminRequest(res, session)
 
     const form = new multiparty.Form();
     const {fields,files} = await new Promise((resolve,reject) => {
